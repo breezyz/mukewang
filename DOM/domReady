@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>domReady of jQuery</title>
+    <script>
+      function domReady(fn) {
+
+          //对于现代浏览器，对DOMContentLoaded事件的处理采用标准的事件绑定方式
+          if(document.addEventListener) {
+              document.addEventListener('DOMContentLoaded', fn, false);
+          } else {
+              IEContentLoaded(fn);
+          }
+
+          // //IE模拟DOMContentLoaded
+          function IEContentLoaded(fn) {
+              var doc = window.document;
+              var done = false;
+
+              //只执行一次用户的回调函数init()
+              var init = function () {
+                  if(!done){
+                      done = true;
+                      fn();
+                  }
+              };
+
+              (function () {
+                try{
+                    // DOM树未创建完之前调用doScroll会抛出错误
+                    doc.documentElement.doScroll('left');
+                } catch (e){
+                    //延迟再试一次~
+                    setTimeout(agruments.callee, 50);
+                    return;
+                }
+                  // 没有错误就表示DOM树创建完毕，然后立马执行用户回调
+                  init();
+              })();
+
+              //监听document的加载状态
+              doc.onreadystatechange = function () {
+                  if(doc.readyState == 'complete'){
+                      doc.onreadystatechange = null;
+                      init();
+                  }
+              }
+          }
+      }
+
+      domReady(function () {
+          document.getElementById("header").style.color = "red";
+      });
+    </script>
+  </head>
+  <body>
+    <h1 id="header">这里是h1元素包含的内容</h1>
+  </body>
+</html>
